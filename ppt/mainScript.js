@@ -9,47 +9,58 @@ window.addEventListener("DOMContentLoaded", () => {
   const originalHeight = slideMetadata.height;
   const originalRatio = originalWidth / originalHeight;
 
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
-  const windowRatio = windowWidth / windowHeight;
+  // Function to calculate canvas size based on window dimensions
+  function updateCanvasSize() {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const windowRatio = windowWidth / windowHeight;
 
-  let renderedWidth, renderedHeight;
+    let renderedWidth, renderedHeight;
 
-  if (originalRatio >= windowRatio) {
-    // Fit to width
-    renderedWidth = windowWidth;
-    renderedHeight = windowWidth / originalRatio;
-  } else {
-    // Fit to height
-    renderedHeight = windowHeight;
-    renderedWidth = windowHeight * originalRatio;
+    if (originalRatio >= windowRatio) {
+      // Fit to width
+      renderedWidth = windowWidth;
+      renderedHeight = windowWidth / originalRatio;
+    } else {
+      // Fit to height
+      renderedHeight = windowHeight;
+      renderedWidth = windowHeight * originalRatio;
+    }
+
+    // DPI-scaled internal canvas resolution
+    canvas.width = renderedWidth * dpi;
+    canvas.height = renderedHeight * dpi;
+
+    // CSS dimensions (logical)
+    canvas.style.width = `${renderedWidth}px`;
+    canvas.style.height = `${renderedHeight}px`;
+
+    ctx.scale(dpi, dpi);
+
+    // Redraw the background image
+    const bgImage = new Image();
+    bgImage.src = "slide_1.png";
+    bgImage.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bgImage, 0, 0, renderedWidth, renderedHeight);
+    };
   }
 
-  // DPI-scaled internal canvas resolution
-  canvas.width = renderedWidth * dpi;
-  canvas.height = renderedHeight * dpi;
+  // Initial canvas size update
+  updateCanvasSize();
 
-  // CSS dimensions (logical)
-  canvas.style.width = `${renderedWidth}px`;
-  canvas.style.height = `${renderedHeight}px`;
-
-  ctx.scale(dpi, dpi);
-
-  // Load and draw background image
-  const bgImage = new Image();
-  bgImage.src = "slide_1.png";
-  bgImage.onload = () => {
-    ctx.drawImage(bgImage, 0, 0, renderedWidth, renderedHeight);
-  };
+  // Resize event listener to update canvas when window size changes
+  window.addEventListener("resize", updateCanvasSize);
 
   // Helper for scaling mouse coordinates
   function getRelativeCoords(e) {
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (originalWidth / renderedWidth);
-    const y = (e.clientY - rect.top) * (originalHeight / renderedHeight);
+    const x = (e.clientX - rect.left) * (originalWidth / canvas.style.width.replace("px", ""));
+    const y = (e.clientY - rect.top) * (originalHeight / canvas.style.height.replace("px", ""));
     return { x, y };
   }
 
+  // Mousemove listener to display tooltip and handle link clicks
   canvas.addEventListener("mousemove", (e) => {
     const { x, y } = getRelativeCoords(e);
     let found = false;
@@ -73,11 +84,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Mouseleave listener to hide tooltip
   canvas.addEventListener("mouseleave", () => {
     tooltip.style.display = "none";
     canvas.style.cursor = "default";
   });
 
+  // Click listener to handle opening links
   canvas.addEventListener("click", (e) => {
     const { x, y } = getRelativeCoords(e);
     for (let i = slideMetadata.links.length - 1; i >= 0; i--) {
