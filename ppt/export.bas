@@ -1,5 +1,5 @@
 Attribute VB_Name = "Module1"
-Sub ExportSlideWithLinkData()
+Public Sub ExportSlideWithLinkData()
 
     Dim slide As slide
     Dim shape As shape
@@ -65,7 +65,8 @@ Sub ExportSlideWithLinkData()
     Print #jsFile, linkData
     Close #jsFile
 
-    MsgBox "Slide exported as PNG and metadata saved to slideData.js", vbInformation
+    'MsgBox "Slide exported as PNG and metadata saved to slideData.js", vbInformation
 
 End Sub
+
 
