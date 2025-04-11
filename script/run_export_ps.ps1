@@ -13,6 +13,25 @@ function Export-SlideWithLinkData {
     $imgPath = Join-Path $outputPath "slide_$slideIndex.png"
     $slide.Export($imgPath, "PNG", $slideWidth * $dpiFactor, $slideHeight * $dpiFactor)
 
+
+    # Ungroup grouped shapes and build a flat shape list
+    $flatShapes = @()
+
+    foreach ($shape in $slide.Shapes) {
+        if ($shape.Type -eq 6) {  # msoGroup
+            try {
+                $ungrouped = $shape.Ungroup()
+                foreach ($s in $ungrouped) {
+                    $flatShapes += $s
+                }
+            } catch {
+                Write-Warning "Failed to ungroup a shape on slide $slideIndex"
+            }
+        } else {
+            $flatShapes += $shape
+        }
+    }
+
     # Build JS metadata
     $linkData = @"
 const slideMetadata = {
@@ -21,9 +40,9 @@ const slideMetadata = {
   links: [
 "@
 
-    $hasLink = $false
-    foreach ($shape in $slide.Shapes) {
-        if ($shape.Type -eq 13) {
+       $hasLink = $false
+    foreach ($shape in $flatShapes) {
+        if ($shape.Type -eq 13) {  # msoPicture
             $hyperlink = $shape.ActionSettings.Item(1).Hyperlink.Address
             if ($hyperlink) {
                 $hasLink = $true
