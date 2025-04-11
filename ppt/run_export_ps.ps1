@@ -1,7 +1,8 @@
 function Export-SlideWithLinkData {
     param (
-        [string]$pptxPath,  # Path to the PowerPoint file
-        [string]$outputPath  # Path to save exported results
+        [string]$pptxPath,       # Path to the PowerPoint file
+        [string]$outputPath,     # Path to save exported results
+        [int]$slideNumber        # Number of the slide to process
     )
 
     # Create PowerPoint COM object
@@ -11,9 +12,9 @@ function Export-SlideWithLinkData {
     # Open the presentation
     $presentation = $ppApp.Presentations.Open($pptxPath)
 
-    # Get the active slide (use the slide index directly)
-    $slideIndex = 2  
-    $slide = $presentation.Slides.Item($slideIndex)  # Use slide index directly
+    # Use the slide number provided
+    $slideIndex = $slideNumber
+    $slide = $presentation.Slides.Item($slideIndex)
 
     # Set DPI factor (1.5x or 2x for HiDPI)
     $dpiFactor = 2
@@ -59,8 +60,8 @@ const slideMetadata = {
 };
 "@
 
-    # Save metadata to slideData.js file
-    $jsonJSPath = Join-Path $outputPath "slideData.js"
+    # Save metadata to slide_<index>_data.js file
+    $jsonJSPath = Join-Path $outputPath "slide_${slideIndex}_data.js"
     $linkData | Out-File -FilePath $jsonJSPath -Encoding utf8
 
     # Clean up and close PowerPoint application
@@ -73,13 +74,14 @@ const slideMetadata = {
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($ppApp) | Out-Null
 
     # Clean up
-    [GC]::Collect()  # Force garbage collection
-    [GC]::WaitForPendingFinalizers()  # Wait for finalizer threads to complete
+    [GC]::Collect()
+    [GC]::WaitForPendingFinalizers()
 
-    Write-Host "Slide exported as PNG and metadata saved to slideData.js"
+    Write-Host "Slide $slideIndex exported as PNG and metadata saved to slide_${slideIndex}_data.js"
 }
 
 # Example usage:
 $pptxPath = "C:\temp\HomeSite.pptx"
 $outputPath = "C:\temp"
-Export-SlideWithLinkData -pptxPath $pptxPath -outputPath $outputPath
+$slideNumber = 2
+Export-SlideWithLinkData -pptxPath $pptxPath -outputPath $outputPath -slideNumber $slideNumber
