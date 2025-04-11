@@ -1,3 +1,25 @@
+function Resolve-SubAddressToSlideIndex {
+    param (
+        [Microsoft.Office.Interop.PowerPoint.Presentation]$presentation,
+        [string]$subAddress
+    )
+
+    foreach ($s in $presentation.Slides) {
+        if ($s.Name -eq $subAddress) {
+            return $s.SlideIndex
+        }
+        try {
+            if ([int]$subAddress -eq $s.SlideIndex) {
+                return $s.SlideIndex
+            }
+        } catch {
+            # Not an integer, skip
+        }
+    }
+
+    return $null
+}
+
 function Export-SlideWithLinkData {
     param (
         [object]$slide,
@@ -40,22 +62,39 @@ const slideMetadata = {
   links: [
 "@
 
-       $hasLink = $false
-    foreach ($shape in $flatShapes) {
-        if ($shape.Type -eq 13) {  # msoPicture
-            $hyperlink = $shape.ActionSettings.Item(1).Hyperlink.Address
-            if ($hyperlink) {
+      $hasLink = $false
+foreach ($shape in $slide.Shapes) {
+    if ($shape.Type -eq 13) {  # msoPicture
+        $actionSetting = $shape.ActionSettings.Item(1)
+        if ($actionSetting.Action -eq 7) {  # ppActionHyperlink
+            $hyperlink = $actionSetting.Hyperlink
+            $url = $null
+
+            if ($hyperlink.Address) {
+                # External link
+                $url = $hyperlink.Address
+            } elseif ($hyperlink.SubAddress) {
+                # Parse SubAddress: expect something like "265,10,Slide 10"
+                $parts = $hyperlink.SubAddress -split ","
+                if ($parts.Count -ge 2 -and $parts[1] -match '^\d+$') {
+                    $targetIndex = [int]$parts[1]
+                    $url = "slide_$targetIndex.html"
+                }
+            }
+
+            if ($url) {
                 $hasLink = $true
                 $linkData += @"
-    { x: $($shape.Left), y: $($shape.Top), w: $($shape.Width), h: $($shape.Height), url: '$hyperlink' },
+    { x: $($shape.Left), y: $($shape.Top), w: $($shape.Width), h: $($shape.Height), url: '$url' },
 "@
             }
         }
     }
+}
 
-    if ($hasLink) {
-        $linkData = $linkData.TrimEnd(",`r`n") + "`r`n"
-    }
+if ($hasLink) {
+    $linkData = $linkData.TrimEnd(",`r`n") + "`r`n"
+}
 
     $linkData += @"
   ]
@@ -129,7 +168,7 @@ function Export-PresentationWithLinkData {
 }
 
 # === Example usage ===
-$pptxPath = "C:\temp\HomeSite.pptx"
+$pptxPath = "C:\temp\Save_to_canvas.pptm"
 $outputPath = "C:\temp\output"
 $templatePath = "C:\temp\templates"
 
