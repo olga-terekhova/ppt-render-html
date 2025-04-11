@@ -1,28 +1,13 @@
 function Export-SlideWithLinkData {
     param (
-        [string]$pptxPath,        # Path to the PowerPoint file
-        [string]$outputPath,      # Path to save exported results
-        [int]$slideNumber,        # Number of the slide to process
-        [string]$templatePath     # Path to the templates folder
+        [object]$slide,
+        [int]$slideIndex,
+        [string]$outputPath,
+        [string]$templatePath,
+        [single]$slideWidth,
+        [single]$slideHeight,
+        [int]$dpiFactor
     )
-
-    # Create PowerPoint COM object
-    $ppApp = New-Object -ComObject PowerPoint.Application
-    $ppApp.Visible = [Microsoft.Office.Core.MsoTriState]::msoTrue
-
-    # Open the presentation
-    $presentation = $ppApp.Presentations.Open($pptxPath)
-
-    # Use the slide number provided
-    $slideIndex = $slideNumber
-    $slide = $presentation.Slides.Item($slideIndex)
-
-    # Set DPI factor
-    $dpiFactor = 2
-
-    # Get slide dimensions
-    $slideWidth = $presentation.PageSetup.SlideWidth
-    $slideHeight = $presentation.PageSetup.SlideHeight
 
     # Export slide as PNG
     $imgPath = Join-Path $outputPath "slide_$slideIndex.png"
@@ -79,24 +64,54 @@ const slideMetadata = {
     $newScriptPath = Join-Path $outputPath "mainScript_${slideIndex}.js"
     $scriptContent | Out-File -FilePath $newScriptPath -Encoding utf8
 
+    Write-Host "Processed slide $slideIndex"
+}
+
+function Export-PresentationWithLinkData {
+    param (
+        [string]$pptxPath,
+        [string]$outputPath,
+        [string]$templatePath
+    )
+
+    # Create PowerPoint COM object
+    $ppApp = New-Object -ComObject PowerPoint.Application
+    $ppApp.Visible = [Microsoft.Office.Core.MsoTriState]::msoTrue
+
+    # Open the presentation
+    $presentation = $ppApp.Presentations.Open($pptxPath)
+
+    # Get slide dimensions and DPI settings
+    $slideWidth = $presentation.PageSetup.SlideWidth
+    $slideHeight = $presentation.PageSetup.SlideHeight
+    $dpiFactor = 2
+
+    # Copy style.css
+    Copy-Item -Path (Join-Path $templatePath "style.css") -Destination $outputPath -Force
+
+    # Process each slide
+    $totalSlides = $presentation.Slides.Count
+    for ($i = 1; $i -le $totalSlides; $i++) {
+        $slide = $presentation.Slides.Item($i)
+        Export-SlideWithLinkData -slide $slide -slideIndex $i -outputPath $outputPath -templatePath $templatePath -slideWidth $slideWidth -slideHeight $slideHeight -dpiFactor $dpiFactor
+    }
+
     # Clean up PowerPoint
     $presentation.Close()
     $ppApp.Quit()
 
-    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($slide) | Out-Null
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($presentation) | Out-Null
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($ppApp) | Out-Null
 
     [GC]::Collect()
     [GC]::WaitForPendingFinalizers()
 
-    Write-Host "Slide $slideIndex exported as PNG and metadata. HTML and JS customized from templates."
+    Write-Host "Presentation processed and output saved to $outputPath"
 }
 
 # === Example usage ===
 $pptxPath = "C:\temp\HomeSite.pptx"
 $outputPath = "C:\temp\output"
 $templatePath = "C:\temp\templates"
-$slideNumber = 2
 
-Export-SlideWithLinkData -pptxPath $pptxPath -outputPath $outputPath -slideNumber $slideNumber -templatePath $templatePath
+Export-PresentationWithLinkData -pptxPath $pptxPath -outputPath $outputPath -templatePath $templatePath
