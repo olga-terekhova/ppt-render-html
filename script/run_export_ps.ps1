@@ -63,12 +63,13 @@ const slideMetadata = {
 "@
 
       $hasLink = $false
-foreach ($shape in $slide.Shapes) {
-    if ($shape.Type -eq 13) {  # msoPicture
-        $actionSetting = $shape.ActionSettings.Item(1)
-        if ($actionSetting.Action -eq 7) {  # ppActionHyperlink
-            $hyperlink = $actionSetting.Hyperlink
-            $url = $null
+      foreach ($shape in $flatShapes) {
+      $actionSetting = $shape.ActionSettings.Item(1)  # ppMouseClick
+      $hyperlink = $actionSetting.Hyperlink
+	
+        
+      if ($actionSetting.Action -eq 7 -and $hyperlink) {  # ppActionHyperlink = 7
+        $url = $null
 
             if ($hyperlink.Address) {
                 # External link
@@ -89,7 +90,7 @@ foreach ($shape in $slide.Shapes) {
 "@
             }
         }
-    }
+    
 }
 
 if ($hasLink) {
@@ -168,7 +169,7 @@ function Export-PresentationWithLinkData {
 }
 
 # === Example usage ===
-$pptxPath = "C:\temp\Save_to_canvas.pptm"
+$pptxPath = "C:\temp\HomeSite.pptx"
 $outputPath = "C:\temp\output"
 $templatePath = "C:\temp\templates"
 
