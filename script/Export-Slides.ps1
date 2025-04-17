@@ -1,24 +1,9 @@
-function Resolve-SubAddressToSlideIndex {
-    param (
-        [Microsoft.Office.Interop.PowerPoint.Presentation]$presentation,
-        [string]$subAddress
-    )
+param (
+    [Alias("p")][string]$pptxPath,
+    [Alias("o")][string]$outputPath,
+    [Alias("t")][string]$templatePath
+)
 
-    foreach ($s in $presentation.Slides) {
-        if ($s.Name -eq $subAddress) {
-            return $s.SlideIndex
-        }
-        try {
-            if ([int]$subAddress -eq $s.SlideIndex) {
-                return $s.SlideIndex
-            }
-        } catch {
-            # Not an integer, skip
-        }
-    }
-
-    return $null
-}
 
 function Export-SlideWithLinkData {
     param (
@@ -168,9 +153,14 @@ function Export-PresentationWithLinkData {
     Write-Host "Presentation processed and output saved to $outputPath"
 }
 
-# === Example usage ===
-$pptxPath = "C:\temp\HomeSite.pptx"
-$outputPath = "C:\temp\output"
-$templatePath = "C:\temp\templates"
 
-Export-PresentationWithLinkData -pptxPath $pptxPath -outputPath $outputPath -templatePath $templatePath
+if ($pptxPath -and $outputPath -and $templatePath) {
+    Export-PresentationWithLinkData -pptxPath $pptxPath -outputPath $outputPath -templatePath $templatePath
+}
+
+# === Example usage ===
+#$pptxPath = "C:\temp\HomeSite.pptx"
+#$outputPath = "C:\temp\output"
+#$templatePath = "C:\temp\templates"
+
+#Export-PresentationWithLinkData -pptxPath $pptxPath -outputPath $outputPath -templatePath $templatePath
