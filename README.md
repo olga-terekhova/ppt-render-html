@@ -18,11 +18,15 @@ All in all, not the greatest feeling when interacting with the page.
 
 I wanted something like ppt exported to html, but this functionality has been long gone from PowerPoint.  
   
-An appealing alternative would be using Miro. But their link buttons look cluttered to me and they can't be disabled.   
+An appealing alternative would be using Miro. But their link buttons look cluttered to me and they can't be disabled. Plus, you can't link on the object itself, only on the associated link button.  
+<p align="center">
+  <img src="docs/miro.png" width="345">
+</p>  
+  
 A long time ago, in a country far, far away, in a post not saved by Web Archive, I read a nice write-up by Miro that described how they migrated rendering of their content to HTML canvas.  
 So I decided to make my own export of slides to HTML canvas.  
   
-My main requirements:  
+Main requirements:  
 	1) The page is 100% identical visually to the original slide  
 	2) Links are clickable  
 	3) The page scales to the window  
