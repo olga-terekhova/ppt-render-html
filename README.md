@@ -1,10 +1,10 @@
 # ppt-render-html
 ## Why  
-I needed a simple local home web page which could be edited in a graphical WYSIWYG way, for a kid-friendly dashboard.    
+I needed a simple local home web page which could be edited in a graphical WYSIWYG way, for a child-friendly dashboard.    
   
 Here's one way: create a PowerPoint presentation, embed it into a simple html page, and voilà!  
   
-Several problems, though.  
+Several problems, though:  
 	1) Microsoft did not care about high-resolution screens. So what looks like a crisp image in PowerPoint turns into a blurred embarassment in the embedding.  
 	2) The resulting page is not adaptive at all. The dimensions are fixed.  
   3) Microsoft can change the link to the shared presentation, or the embedding stops working altogether.    
