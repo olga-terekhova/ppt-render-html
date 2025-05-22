@@ -93,3 +93,51 @@ Navigate to the project root folder, then:
 ```
 .\script\Export-Slides.ps1 -p "C:\ppt-render-html\input\HomeSite.pptx" -o "C:\ppt-render-html\output" -t "C:\ppt-render-html\templates"
 ```
+
+## Developer guide  
+### Script Overview
+#### 1. /script/Export-Slides.ps1  
+This is the core export script.
+  
+Parameters:  
+```
+param (
+    [Alias("p")][string]$pptxPath,       # Path to PowerPoint file
+    [Alias("o")][string]$outputPath,     # Output folder for generated files
+    [Alias("t")][string]$templatePath    # Folder with template files
+)
+```
+  
+Functionality:
+1. Opens the PowerPoint file as a COM object    
+2. Iterates through slides:  
+   - Exports PNG for the whole slide
+   - Builds JS metadata for the links (address + dimensions of the rectangular area serving as a hyperlink)  
+   - Generates customized HTML and JS files per slide  
+3. Copies style.css once (shared across htmls)  
+
+#### 2. /script/Run-Export-Slides.ps1
+  
+This script simplifies execution by loading parameters from a .ps1 config file.
+  
+Parameters:  
+```
+param (
+    [Alias("p")][string]$paramPath  # Optional path to a custom param file
+)
+```
+
+Functionality:  
+1. Loads Params.ps1 from:  
+```
+/script/param/Params.ps1
+```
+unless a different path is provided via -p.   
+  
+2. Extracts:  
+```
+$pptxPath
+$outputPath
+$templatePath
+```  
+3. Runs Export-Slides.ps1 with those values.
