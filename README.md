@@ -39,27 +39,38 @@ Main requirements:
 ### Project structure  
 ```
 /
+├── input/
+│   └── HomeSite.pptx              # PowerPoint presentation to convert
+│
 ├── script/
-│   ├── Export-Slides.ps1         # Main script that performs slide export
-│   ├── Run-Export-Slides.ps1     # Wrapper script to run with config file
+│   ├── Export-Slides.ps1          # Main script that performs slide export
+│   ├── Run-Export-Slides.ps1      # Wrapper script to run with config file
 │   └── param/
-│       └── Params.ps1            # Parameters file with paths
+│       └── Params.ps1             # Config file to parameterize paths
 │
 ├── templates/
-│   ├── slide.html                # HTML template
-│   ├── mainScript.js             # JavaScript template
-│   └── style.css                 # Shared CSS
+│   ├── slide.html                 # HTML template
+│   ├── mainScript.js              # JavaScript template
+│   └── style.css                  # Shared CSS
 │
 ├── output/
-│   └── slide_1.html, slide_1.png, slide_1_data.js, etc.
+│   └── slide_1.html, slide_1.png, slide_1_data.js, etc.  # Generated static website
+
 ```
 ### Requirements  
 1. PowerShell 5.x+  
 2. Microsoft PowerPoint (for COM automation)  
 3. Windows OS  
 
-### How to run the export  
-#### Using the wrapper
+### Prepare to export  
+1. Create or edit a PowerPoint presentation. It can contain several slides.  Its shapes or textboxes can have external links or links to other slides in the same presentation. Save and close.  
+2. Place the pptx or pptm file in the input folder.  
+3. Edit the Params.ps1 file so that $pptxPath points to the target pptx/pptm file.  
+4. Clear the content of the output folder.
+5. Run the export.  
+
+### Run the export  
+#### Use the wrapper (1st option)
 1. Define Parameters in /script/param/Params.ps1:
 ```
 $pptxPath = "C:\ppt-render-html\input\HomeSite.pptx"
@@ -76,7 +87,7 @@ Or use a custom parameter file:
 .\script\Run-Export-Slides.ps1 -p "C:\ppt-render-html\script\myParams.ps1"
 ```
 
-#### Passing parameters directly into the main export script  
+#### Pass parameters directly into the main export script (2nd option)  
 1. Run from Terminal:  
 Navigate to the project root folder, then:  
 ```
