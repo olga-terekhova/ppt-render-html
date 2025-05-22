@@ -1,5 +1,5 @@
 # ppt-render-html
-## Why  
+## Why This Exists  
 I needed a simple local home web page which could be edited in a graphical WYSIWYG way, for a child-friendly dashboard.    
   
 Here's one way: create a PowerPoint presentation, embed it into a simple html page, and voilà!  
@@ -35,7 +35,7 @@ Main requirements:
   <img src="docs/page2.png" width="1473">
 </p>  
 
-## User guide
+## User Guide
 ### Project structure  
 ```
 /
@@ -94,7 +94,7 @@ Navigate to the project root folder, then:
 .\script\Export-Slides.ps1 -p "C:\ppt-render-html\input\HomeSite.pptx" -o "C:\ppt-render-html\output" -t "C:\ppt-render-html\templates"
 ```
 
-## Developer guide  
+## Developer Guide  
 ### Script Overview
 #### 1. /script/Export-Slides.ps1  
 This is the core export script.
