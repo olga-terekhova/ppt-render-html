@@ -54,7 +54,7 @@ Main requirements:
 │   └── style.css                  # Shared CSS
 │
 ├── output/
-│   └── slide_1.html, slide_1.png, slide_1_data.js, etc.  # Generated static website
+│   └── slide_1.html, slide_1.png, slide_1_data.js, favicon_1.png, etc.  # Generated static website
 
 ```
 ### Requirements  
@@ -111,6 +111,7 @@ param (
 Functionality:
 1. Opens the PowerPoint file as a COM object    
 2. Iterates through slides:  
+   - Exports a shape named "icon" as a png icon (if found among slide shapes)
    - Exports PNG for the whole slide
    - Builds JS metadata for the links (address + dimensions of the rectangular area serving as a hyperlink)  
    - Generates customized HTML and JS files per slide  
