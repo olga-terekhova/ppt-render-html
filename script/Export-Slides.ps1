@@ -20,12 +20,31 @@ function Export-SlideWithLinkData {
     $imgPath = Join-Path $outputPath "slide_$slideIndex.png"
     $slide.Export($imgPath, "PNG", $slideWidth * $dpiFactor, $slideHeight * $dpiFactor)
 
+    
 
     # Ungroup grouped shapes and build a flat shape list
+    $foundIcon = $false
     $flatShapes = @()
 
+
     foreach ($shape in $slide.Shapes) {
-        if ($shape.Type -eq 6) {  # msoGroup
+        
+	
+	# Export "icon" shape as PNG to use as a favicon
+	if ($shape.Name -eq "icon") {
+                
+		$foundIcon = $true
+
+      		# Output file name
+                $outputFile = Join-Path $outputPath "favicon_$slideIndex.png"
+                
+                # Export the shape as PNG
+                $shape.Export($outputFile, [Microsoft.Office.Interop.PowerPoint.PpShapeFormat]::ppShapeFormatPNG)
+                
+        }
+	
+	# Ungroup the current shape
+	if ($shape.Type -eq 6) {  # msoGroup
             try {
                 $ungrouped = $shape.Ungroup()
                 foreach ($s in $ungrouped) {
@@ -94,6 +113,11 @@ if ($hasLink) {
     # === Process slide.html template ===
     $slideHtmlPath = Join-Path $templatePath "slide.html"
     $slideHtmlContent = Get-Content $slideHtmlPath -Raw
+    if ($foundIcon) {
+        $linkTag = "<link rel=`"icon`" type=`"image/png`" href=`"favicon_$slideIndex.png`">"
+        $slideHtmlContent = $slideHtmlContent -replace '<!-- favicon here -->', $linkTag
+
+    } 
     $slideHtmlContent = $slideHtmlContent -replace "slideCanvas", "slideCanvas_$slideIndex"
     $slideHtmlContent = $slideHtmlContent -replace "slideData\.js", "slide_${slideIndex}_data.js"
     $slideHtmlContent = $slideHtmlContent -replace "mainScript\.js", "mainScript_${slideIndex}.js"
