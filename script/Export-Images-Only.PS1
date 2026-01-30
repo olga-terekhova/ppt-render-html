@@ -8,16 +8,18 @@ function Export-SlideWithLinkData {
         [object]$slide,
         [int]$slideIndex,
         [string]$outputPath,
+	[string]$baseName,
         [single]$slideWidth,
         [single]$slideHeight,
         [int]$dpiFactor
     )
 
     # Export slide as PNG
-    $imgPath = Join-Path $outputPath "slide_$slideIndex.png"
+    $imgFileName = $baseName + "_" + $slideIndex + ".png"
+    $imgPath = Join-Path $outputPath $imgFileName
     $slide.Export($imgPath, "PNG", $slideWidth * $dpiFactor, $slideHeight * $dpiFactor)
 
-    Write-Host "Processed slide $slideIndex"
+    Write-Host "Processed slide $slideIndex, exported to $imgFileName"
 }
 
 
@@ -34,6 +36,7 @@ function Export-Presentation {
     $presentation = $ppApp.Presentations.Open($pptxPath)
 
     $outputPath = Split-Path -Parent $pptxPath
+    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($pptxPath)
 
     # Get slide dimensions and DPI settings
     $slideWidth = $presentation.PageSetup.SlideWidth
@@ -44,7 +47,7 @@ function Export-Presentation {
     $totalSlides = $presentation.Slides.Count
     for ($i = 1; $i -le $totalSlides; $i++) {
         $slide = $presentation.Slides.Item($i)
-        Export-SlideWithLinkData -slide $slide -slideIndex $i -outputPath $outputPath -slideWidth $slideWidth -slideHeight $slideHeight -dpiFactor $dpiFactor
+        Export-SlideWithLinkData -slide $slide -slideIndex $i -outputPath $outputPath -baseName $baseName -slideWidth $slideWidth -slideHeight $slideHeight -dpiFactor $dpiFactor
     }
 
     # Clean up PowerPoint
